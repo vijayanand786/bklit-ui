@@ -1,50 +1,39 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --fd-background: 0 0% 4%;
+  --fd-foreground: 0 0% 98%;
+  --fd-primary: 250 100% 70%;
+  --fd-primary-foreground: 0 0% 100%;
+  --fd-muted: 240 4% 16%;
+  --fd-muted-foreground: 240 5% 65%;
+  --fd-accent: 240 4% 16%;
+  --fd-accent-foreground: 0 0% 98%;
+  --fd-border: 240 4% 16%;
+  --fd-ring: 250 100% 70%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.light {
+  --fd-background: 0 0% 100%;
+  --fd-foreground: 240 10% 4%;
+  --fd-primary: 250 100% 55%;
+  --fd-primary-foreground: 0 0% 100%;
+  --fd-muted: 240 5% 96%;
+  --fd-muted-foreground: 240 4% 46%;
+  --fd-accent: 240 5% 96%;
+  --fd-accent-foreground: 240 6% 10%;
+  --fd-border: 240 6% 90%;
+  --fd-ring: 250 100% 55%;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+/* Component preview styles */
+.component-preview {
+  @apply rounded-xl border border-fd-border bg-fd-muted/30 p-6;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
+.component-preview-dark {
+  @apply bg-fd-background;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
-  }
-}

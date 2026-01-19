@@ -1,5 +1,5 @@
 {
-  "name": "charts",
+  "name": "bklit-ui",
   "private": true,
   "scripts": {
     "build": "turbo run build",

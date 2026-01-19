@@ -1,0 +1,40 @@
+---
+title: Line Chart
+description: A beautiful curved line chart with tooltips and hover interactions
+---
+
+import CurvedLineChart from "@repo/ui/line-chart";
+
+## Preview
+
+<div className="my-6 w-full">
+  <CurvedLineChart />
+</div>
+
+## Installation
+
+```bash
+import CurvedLineChart from '@repo/ui/line-chart';
+```
+
+## Usage
+
+```tsx
+import CurvedLineChart from "@repo/ui/line-chart";
+
+export default function Dashboard() {
+  return (
+    <div className="w-full">
+      <CurvedLineChart />
+    </div>
+  );
+}
+```
+
+## Dependencies
+
+This component requires the following packages:
+
+```bash
+pnpm add @visx/shape @visx/curve @visx/scale @visx/gradient @visx/responsive @visx/event d3-array
+```
