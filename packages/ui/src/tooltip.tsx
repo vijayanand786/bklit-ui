@@ -108,11 +108,19 @@ export function ChartTooltip({
   }, [x, animatedX]);
 
   // Tooltip box position - flip to left side when near right edge
-  const tooltipWidth = 160;
+  // Use consistent offset (16px) on both sides
+  const tooltipOffset = 16;
+  const tooltipWidth = 180; // Estimated max width for collision detection
+  const shouldFlip = x + tooltipWidth + tooltipOffset > containerWidth;
+
   const tooltipLeft = useTransform(animatedX, (val) => {
-    const shouldFlip = val + tooltipWidth + 20 > containerWidth;
-    return shouldFlip ? val - tooltipWidth - 14 : val + 14;
+    // Right side: offset from crosshair
+    // Left side: position so right edge is offset from crosshair
+    return shouldFlip ? val - tooltipOffset : val + tooltipOffset;
   });
+
+  // Transform origin for flip animation
+  const transformOrigin = shouldFlip ? "right top" : "left top";
 
   if (!visible) return null;
 
@@ -121,7 +129,12 @@ export function ChartTooltip({
       {/* Tooltip Box */}
       <motion.div
         className={`absolute pointer-events-none z-50 top-10 ${className}`}
-        style={{ left: tooltipLeft }}
+        style={{
+          left: tooltipLeft,
+          // When flipped, translate left by 100% to align right edge with position
+          x: shouldFlip ? "-100%" : 0,
+          transformOrigin,
+        }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}

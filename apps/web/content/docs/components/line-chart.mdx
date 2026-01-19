@@ -65,6 +65,9 @@ interface ChartMarker {
   description?: string; // Optional description
   content?: React.ReactNode; // Custom tooltip content
   color?: string; // Optional background color
+  onClick?: () => void; // Click handler
+  href?: string; // URL to navigate to
+  target?: "_blank" | "_self"; // Link target (default: "_self")
 }
 ```
 
@@ -96,6 +99,30 @@ const markers: ChartMarker[] = [
 <CurvedLineChart markers={markers} />;
 ```
 
+### Clickable Markers
+
+Markers can trigger actions or navigate to URLs:
+
+```tsx
+const markers: ChartMarker[] = [
+  {
+    date: new Date("2025-01-05"),
+    icon: "🚀",
+    title: "v1.2.0 Released",
+    href: "https://github.com/example/releases/v1.2.0",
+    target: "_blank", // Opens in new tab
+  },
+  {
+    date: new Date("2025-01-06"),
+    icon: "📊",
+    title: "View Report",
+    onClick: () => openModal("report"),
+  },
+];
+```
+
+Clickable markers show a hover effect (scale + shadow) and display a ↗ indicator in the tooltip.
+
 ### Stacking Behavior
 
 When multiple markers share the same date:
@@ -103,6 +130,7 @@ When multiple markers share the same date:
 - They stack vertically with a count badge
 - Hovering fans them out in a smooth arc animation
 - All marker details appear in the tooltip
+- Each marker can have its own click action
 
 ## Data Structure
 

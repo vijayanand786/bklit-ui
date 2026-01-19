@@ -658,12 +658,15 @@ export default function CurvedLineChart({
         icon: "🚀",
         title: "v1.2.0 Released",
         description: "New chart animations",
+        href: "https://github.com/example/releases/v1.2.0",
+        target: "_blank",
       },
       {
         date: daysAgo(5),
         icon: "🐛",
         title: "Bug Fix",
         description: "Fixed tooltip positioning",
+        onClick: () => console.log("Bug fix clicked!"),
       },
       {
         date: daysAgo(5),
@@ -676,6 +679,8 @@ export default function CurvedLineChart({
         icon: "🔒",
         title: "Security Patch",
         description: "CVE-2025-1234 fixed",
+        href: "https://github.com/example/security/advisories",
+        target: "_blank",
       },
       {
         date: daysAgo(5),

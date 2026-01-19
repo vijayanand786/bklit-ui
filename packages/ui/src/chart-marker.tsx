@@ -28,6 +28,12 @@ export interface ChartMarker {
   content?: React.ReactNode;
   /** Optional color override for the marker circle */
   color?: string;
+  /** Click handler - called when marker is clicked */
+  onClick?: () => void;
+  /** URL to navigate to when clicked (alternative to onClick) */
+  href?: string;
+  /** Open href in new tab. Default: false */
+  target?: "_blank" | "_self";
 }
 
 export interface MarkerGroupProps {
@@ -199,6 +205,10 @@ export function MarkerGroup({
                         icon={marker.icon}
                         size={size}
                         color={marker.color}
+                        onClick={marker.onClick}
+                        href={marker.href}
+                        target={marker.target}
+                        isClickable={!!(marker.onClick || marker.href)}
                       />
                     </motion.div>
                   );
@@ -241,6 +251,10 @@ interface MarkerCircleProps {
   icon: React.ReactNode;
   size: number;
   color?: string;
+  onClick?: () => void;
+  href?: string;
+  target?: "_blank" | "_self";
+  isClickable?: boolean;
 }
 
 // SVG version for the main stacked marker
@@ -284,19 +298,55 @@ function MarkerCircle({ icon, size, color }: MarkerCircleProps) {
 }
 
 // HTML version for the fanned markers (rendered via portal)
-function MarkerCircleHTML({ icon, size, color }: MarkerCircleProps) {
+function MarkerCircleHTML({
+  icon,
+  size,
+  color,
+  onClick,
+  href,
+  target = "_self",
+  isClickable = false,
+}: MarkerCircleProps) {
+  const hasAction = isClickable || onClick || href;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    } else if (href) {
+      if (target === "_blank") {
+        window.open(href, "_blank", "noopener,noreferrer");
+      } else {
+        window.location.href = href;
+      }
+    }
+  };
+
   return (
-    <div
-      className="relative w-full h-full rounded-full flex items-center justify-center shadow-lg"
+    <motion.div
+      className={`relative w-full h-full rounded-full flex items-center justify-center shadow-lg ${
+        hasAction ? "cursor-pointer" : ""
+      }`}
       style={{
         backgroundColor: color || cssVars.markerBackground,
         border: `1.5px solid ${cssVars.markerBorder}`,
         fontSize: size * 0.5,
         color: cssVars.markerForeground,
       }}
+      onClick={hasAction ? handleClick : undefined}
+      whileHover={
+        hasAction
+          ? {
+              scale: 1.15,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            }
+          : undefined
+      }
+      whileTap={hasAction ? { scale: 0.95 } : undefined}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
       {icon}
-    </div>
+    </motion.div>
   );
 }
 
@@ -305,45 +355,62 @@ export interface MarkerTooltipContentProps {
   markers: ChartMarker[];
 }
 
+const MAX_TOOLTIP_MARKERS = 2;
+
 export function MarkerTooltipContent({ markers }: MarkerTooltipContentProps) {
   if (markers.length === 0) return null;
 
+  const visibleMarkers = markers.slice(0, MAX_TOOLTIP_MARKERS);
+  const hiddenCount = markers.length - MAX_TOOLTIP_MARKERS;
+
   return (
     <div className="border-t border-zinc-700/50 pt-2 mt-2 space-y-2">
-      {markers.map((marker, index) => (
-        <div key={index} className="flex items-start gap-2">
-          <div
-            className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: marker.color || cssVars.markerBackground,
-              border: `1px solid ${cssVars.markerBorder}`,
-            }}
-          >
-            <span
-              className="text-xs"
-              style={{ color: cssVars.markerForeground }}
+      {visibleMarkers.map((marker, index) => {
+        const isClickable = !!(marker.onClick || marker.href);
+        return (
+          <div key={index} className="flex items-start gap-2">
+            <div
+              className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: marker.color || cssVars.markerBackground,
+                border: `1px solid ${cssVars.markerBorder}`,
+              }}
             >
-              {marker.icon}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            {marker.content ? (
-              marker.content
-            ) : (
-              <>
-                <div className="text-sm font-medium text-white truncate">
-                  {marker.title}
-                </div>
-                {marker.description && (
-                  <div className="text-xs text-zinc-400 truncate">
-                    {marker.description}
+              <span
+                className="text-xs"
+                style={{ color: cssVars.markerForeground }}
+              >
+                {marker.icon}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              {marker.content ? (
+                marker.content
+              ) : (
+                <>
+                  <div className="text-sm font-medium text-white truncate flex items-center gap-1.5">
+                    {marker.title}
+                    {isClickable && (
+                      <span className="text-zinc-500 text-[10px]">↗</span>
+                    )}
                   </div>
-                )}
-              </>
-            )}
+                  {marker.description && (
+                    <div className="text-xs text-zinc-400 truncate">
+                      {marker.description}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
+        );
+      })}
+      {/* Show overflow indicator */}
+      {hiddenCount > 0 && (
+        <div className="text-xs text-zinc-500 pl-7">
+          +{hiddenCount} more...
         </div>
-      ))}
+      )}
     </div>
   );
 }
