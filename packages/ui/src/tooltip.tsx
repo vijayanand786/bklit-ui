@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
-import { motion, useSpring } from "motion/react";
+import { motion, useSpring, AnimatePresence } from "motion/react";
+import useMeasure from "react-use-measure";
 
 // Spring config for smooth tooltip movement - matches dash array for consistency
 const springConfig = { stiffness: 100, damping: 20 };
@@ -90,6 +91,82 @@ function DateTicker({
   );
 }
 
+// Inner content component with height animation for dynamic marker content
+function TooltipContent({
+  title,
+  rows,
+  markerContent,
+}: {
+  title?: string;
+  rows: TooltipRow[];
+  markerContent?: React.ReactNode;
+}) {
+  const [measureRef, bounds] = useMeasure();
+
+  // Generate a key based on whether marker content exists
+  // This ensures AnimatePresence triggers when content changes
+  const markerKey = markerContent ? "has-marker" : "no-marker";
+
+  return (
+    <motion.div
+      animate={{ height: bounds.height || "auto" }}
+      transition={{
+        type: "spring",
+        stiffness: 500,
+        damping: 35,
+        mass: 0.8,
+      }}
+      className="overflow-hidden"
+    >
+      <div ref={measureRef} className="px-3 py-2.5">
+        {title && (
+          <div className="text-xs font-medium text-zinc-400 mb-2">{title}</div>
+        )}
+        <div className="space-y-1.5">
+          {rows.map((row, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between gap-4"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: row.color }}
+                />
+                <span className="text-sm text-zinc-100">{row.label}</span>
+              </div>
+              <span className="text-sm font-medium text-white tabular-nums">
+                {typeof row.value === "number"
+                  ? row.value.toLocaleString()
+                  : row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Animated marker content - fades in with blur */}
+        <AnimatePresence mode="wait">
+          {markerContent && (
+            <motion.div
+              key={markerKey}
+              initial={{ opacity: 0, filter: "blur(4px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, filter: "blur(4px)" }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+              }}
+              className="mt-2"
+            >
+              {markerContent}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
 export function ChartTooltip({
   x,
   visible,
@@ -170,10 +247,10 @@ export function ChartTooltip({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.1 }}
       >
-        {/* Inner content with flip animation */}
+        {/* Inner content with flip animation and height animation */}
         <motion.div
           key={flipKey}
-          className="bg-zinc-900/30 backdrop-blur-md text-white rounded-lg shadow-lg px-3 py-2.5 min-w-[140px]"
+          className="bg-zinc-900/30 backdrop-blur-md text-white rounded-lg shadow-lg min-w-[140px] overflow-hidden"
           initial={{ scale: 0.85, opacity: 0, x: shouldFlip ? 20 : -20 }}
           animate={{ scale: 1, opacity: 1, x: 0 }}
           transition={{
@@ -183,34 +260,11 @@ export function ChartTooltip({
           }}
           style={{ transformOrigin }}
         >
-          {title && (
-            <div className="text-xs font-medium text-zinc-400 mb-2">
-              {title}
-            </div>
-          )}
-          <div className="space-y-1.5">
-            {rows.map((row, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between gap-4"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: row.color }}
-                  />
-                  <span className="text-sm text-zinc-100">{row.label}</span>
-                </div>
-                <span className="text-sm font-medium text-white tabular-nums">
-                  {typeof row.value === "number"
-                    ? row.value.toLocaleString()
-                    : row.value}
-                </span>
-              </div>
-            ))}
-          </div>
-          {/* Marker content appended below data rows */}
-          {markerContent}
+          <TooltipContent
+            title={title}
+            rows={rows}
+            markerContent={markerContent}
+          />
         </motion.div>
       </motion.div>
 
