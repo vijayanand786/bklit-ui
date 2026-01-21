@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@bklit/ui/lib/utils";
 import { useId } from "react";
+import { cn } from "@/lib/utils";
 
 interface IconProps {
   className?: string;

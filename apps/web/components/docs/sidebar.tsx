@@ -4,6 +4,7 @@ import Link from "fumadocs-core/link";
 import type * as PageTree from "fumadocs-core/page-tree";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Button } from "../ui/button";
 
 interface SidebarProps {
   tree: PageTree.Root;
@@ -11,7 +12,7 @@ interface SidebarProps {
 
 export function Sidebar({ tree }: SidebarProps) {
   return (
-    <aside className="fixed top-14 left-0 hidden h-[calc(100vh-3.5rem)] w-64 overflow-hidden border-border border-r bg-background lg:block">
+    <aside className="fixed top-14 left-0 hidden h-[calc(100vh-3.5rem)] w-64 overflow-hidden bg-background lg:block">
       <div className="h-full overflow-y-auto py-4">
         <nav className="px-3">
           <SidebarNodes nodes={tree.children} />
@@ -36,7 +37,7 @@ function SidebarNode({ node }: { node: PageTree.Node }) {
 
   if (node.type === "separator") {
     return (
-      <li className="mt-4 flex items-center gap-2 px-3 pt-3 pb-1.5 font-semibold text-muted-foreground text-xs uppercase tracking-wide first:mt-0 first:pt-0">
+      <li className="mt-4 flex items-center gap-2 px-3 pt-3 pb-1.5 font-light text-muted-foreground text-xs tracking-wide first:mt-0 first:pt-0">
         {node.icon}
         <span>{node.name}</span>
       </li>
@@ -51,16 +52,11 @@ function SidebarNode({ node }: { node: PageTree.Node }) {
     const isActive = pathname === node.url;
     return (
       <li>
-        <Link
-          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm no-underline transition-colors ${
-            isActive
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-          }`}
-          href={node.url}
-        >
-          {node.icon}
-          <span>{node.name}</span>
+        <Link href={node.url}>
+          <Button size="sm" variant={isActive ? "secondary" : "ghost"}>
+            {node.icon}
+            <span>{node.name}</span>
+          </Button>
         </Link>
       </li>
     );
@@ -98,14 +94,15 @@ function SidebarFolder({
             <span>{node.name}</span>
           </Link>
         ) : (
-          <button
-            className="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border-none bg-transparent px-3 py-2 text-left text-muted-foreground text-sm transition-colors hover:bg-muted/50 hover:text-foreground"
+          <Button
             onClick={() => setIsOpen(!isOpen)}
+            size="sm"
             type="button"
+            variant="ghost"
           >
             {node.icon}
             <span>{node.name}</span>
-          </button>
+          </Button>
         )}
         {node.children.length > 0 && (
           <button

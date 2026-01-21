@@ -8,14 +8,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     <NextProvider>
       <DocsLayout
         nav={{
-          title: (
-            <span className="font-semibold">
-              bklit<span className="text-primary">-ui</span>
-            </span>
-          ),
           links: [
             {
-              text: "Get Started",
+              text: "Docs",
               url: "/docs",
               active: "nested-url",
             },

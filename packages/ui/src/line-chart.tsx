@@ -736,9 +736,6 @@ export interface CurvedLineChartProps {
   showXAxisLabels?: boolean;
 }
 
-// Re-export ChartMarker type for consumers
-export type { ChartMarker };
-
 export default function CurvedLineChart({
   animationDuration: initialDuration = 1500,
   showGrid = true,
@@ -746,8 +743,8 @@ export default function CurvedLineChart({
   showXAxisLabels = true,
 }: CurvedLineChartProps = {}) {
   const data = useMemo(() => generateData(), []);
-  const [animationDuration, setAnimationDuration] = useState(initialDuration);
-  const [chartKey, setChartKey] = useState(0);
+  const [animationDuration, _setAnimationDuration] = useState(initialDuration);
+  const [chartKey, _setChartKey] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Demo markers - use prop markers or generate sample ones
@@ -826,66 +823,30 @@ export default function CurvedLineChart({
     return sampleMarkers;
   }, [propMarkers]);
 
-  const handleReplay = () => {
-    setChartKey((prev) => prev + 1);
-  };
-
   return (
-    <div className="w-full">
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-        <button
-          className="rounded-lg bg-blue-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-600"
-          onClick={handleReplay}
-          type="button"
-        >
-          Replay Animation
-        </button>
-
-        {/* Responsive chart container - ParentSize handles resize detection */}
-        <div
-          className="relative w-full"
-          key={chartKey}
-          ref={containerRef}
-          style={{ aspectRatio: "2 / 1" }}
-        >
-          <ParentSize debounceTime={10}>
-            {({ width, height }) => (
-              <Chart
-                animationDuration={animationDuration}
-                containerRef={containerRef}
-                data={data}
-                height={height}
-                markers={markers}
-                showGrid={showGrid}
-                showXAxisLabels={showXAxisLabels}
-                width={width}
-              />
-            )}
-          </ParentSize>
-        </div>
+    <>
+      {/* Responsive chart container - ParentSize handles resize detection */}
+      <div
+        className="relative w-full"
+        key={chartKey}
+        ref={containerRef}
+        style={{ aspectRatio: "2 / 1" }}
+      >
+        <ParentSize debounceTime={10}>
+          {({ width, height }) => (
+            <Chart
+              animationDuration={animationDuration}
+              containerRef={containerRef}
+              data={data}
+              height={height}
+              markers={markers}
+              showGrid={showGrid}
+              showXAxisLabels={showXAxisLabels}
+              width={width}
+            />
+          )}
+        </ParentSize>
       </div>
-
-      {/* Animation Controls */}
-      <div className="mt-4 flex items-center gap-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="flex flex-1 items-center gap-3">
-          <label
-            className="whitespace-nowrap font-medium text-sm text-zinc-700 dark:text-zinc-300"
-            htmlFor="duration-slider"
-          >
-            Duration: {animationDuration}ms
-          </label>
-          <input
-            className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-blue-500 dark:bg-zinc-700"
-            id="duration-slider"
-            max={8000}
-            min={200}
-            onChange={(e) => setAnimationDuration(Number(e.target.value))}
-            step={100}
-            type="range"
-            value={animationDuration}
-          />
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

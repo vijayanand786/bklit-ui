@@ -13,7 +13,6 @@ interface DocsLayoutProps {
   children: ReactNode;
   tree: PageTree.Root;
   nav?: {
-    title?: ReactNode;
     links?: NavLink[];
     githubUrl?: string;
   };
@@ -22,11 +21,7 @@ interface DocsLayoutProps {
 export function DocsLayout({ children, tree, nav }: DocsLayoutProps) {
   return (
     <div className="min-h-screen">
-      <SiteHeader
-        githubUrl={nav?.githubUrl}
-        links={nav?.links}
-        title={nav?.title ?? "Documentation"}
-      />
+      <SiteHeader githubUrl={nav?.githubUrl} links={nav?.links} />
       <div className="mx-auto max-w-7xl pt-14">
         <Sidebar tree={tree} />
         <main className="lg:ml-64 xl:mr-56">{children}</main>
