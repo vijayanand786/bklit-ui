@@ -12,8 +12,35 @@ export {
   type TooltipData,
   useChart,
 } from "./chart-context";
+// Legacy legend component (backward compatibility)
+export {
+  ChartLegend,
+  type ChartLegendProps,
+  type LegendItem,
+} from "./chart-legend";
 // Shared chart elements
 export { Grid, type GridProps } from "./grid";
+// Composable legend components
+export {
+  Legend,
+  type LegendContextValue,
+  LegendItem as LegendItemComponent,
+  type LegendItemContextValue,
+  type LegendItemData,
+  type LegendItemProps,
+  LegendLabel,
+  type LegendLabelProps,
+  LegendMarker,
+  type LegendMarkerProps,
+  LegendProgress,
+  type LegendProgressProps,
+  type LegendProps,
+  LegendValue,
+  type LegendValueProps,
+  legendCssVars,
+  useLegend,
+  useLegendItem,
+} from "./legend";
 // Line chart components
 export { Line, type LineProps } from "./line";
 export { LineChart, type LineChartProps } from "./line-chart";
@@ -28,6 +55,18 @@ export {
   type MarkerTooltipContentProps,
   useActiveMarkers,
 } from "./markers";
+// Ring chart components
+export { Ring, type RingLineCap, type RingProps } from "./ring";
+export { RingCenter, type RingCenterProps } from "./ring-center";
+export { RingChart, type RingChartProps } from "./ring-chart";
+export {
+  defaultRingColors,
+  type RingContextValue,
+  type RingData,
+  RingProvider,
+  ringCssVars,
+  useRing,
+} from "./ring-context";
 
 // Tooltip components
 export {

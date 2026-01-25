@@ -1,0 +1,21 @@
+"use client";
+
+import { useLegendItem } from "./legend-context";
+
+export interface LegendMarkerProps {
+  /** Marker size class. Default: "h-2.5 w-2.5" */
+  className?: string;
+}
+
+export function LegendMarker({ className = "h-2.5 w-2.5" }: LegendMarkerProps) {
+  const { item } = useLegendItem();
+
+  return (
+    <div
+      className={`shrink-0 rounded-full ${className}`}
+      style={{ backgroundColor: item.color }}
+    />
+  );
+}
+
+LegendMarker.displayName = "LegendMarker";
