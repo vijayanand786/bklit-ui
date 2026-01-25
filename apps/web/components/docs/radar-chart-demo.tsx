@@ -97,7 +97,7 @@ export function RadarChartDemo() {
       >
         <RadarGrid />
         <RadarAxis />
-        <RadarLabels />
+        <RadarLabels interactive />
         {campaignData.map((item, index) => (
           <RadarArea index={index} key={item.label} />
         ))}
