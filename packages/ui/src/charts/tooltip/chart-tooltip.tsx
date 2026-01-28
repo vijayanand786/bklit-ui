@@ -45,6 +45,7 @@ export function ChartTooltip({
   const {
     tooltipData,
     width,
+    height,
     innerHeight,
     margin,
     columnWidth,
@@ -52,10 +53,15 @@ export function ChartTooltip({
     xAccessor,
     dateLabels,
     containerRef,
+    orientation,
+    barXAccessor,
   } = useChart();
+
+  const isHorizontal = orientation === "horizontal";
 
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltipWidth, setTooltipWidth] = useState(180);
+  const [tooltipHeight, setTooltipHeight] = useState(80);
   const [mounted, setMounted] = useState(false);
 
   // Only render portals on client side after mount
@@ -63,15 +69,19 @@ export function ChartTooltip({
     setMounted(true);
   }, []);
 
-  // Measure tooltip width
+  // Measure tooltip dimensions
   useLayoutEffect(() => {
     if (tooltipRef.current) {
       const w = tooltipRef.current.offsetWidth;
+      const h = tooltipRef.current.offsetHeight;
       if (w > 0 && w !== tooltipWidth) {
         setTooltipWidth(w);
       }
+      if (h > 0 && h !== tooltipHeight) {
+        setTooltipHeight(h);
+      }
     }
-  }, [tooltipWidth]);
+  }, [tooltipWidth, tooltipHeight]);
 
   // Calculate tooltip position
   const tooltipOffset = 16;
@@ -79,29 +89,52 @@ export function ChartTooltip({
   const x = tooltipData?.x ?? 0;
   const xWithMargin = x + margin.left;
 
-  const shouldFlip = xWithMargin + tooltipWidth + tooltipOffset > width;
-  const targetX = shouldFlip
+  // For horizontal charts, get the y position from the first line's yPosition (center of bar)
+  const firstLineDataKey = lines[0]?.dataKey;
+  const firstLineY = firstLineDataKey
+    ? (tooltipData?.yPositions[firstLineDataKey] ?? 0)
+    : 0;
+  const yWithMargin = firstLineY + margin.top;
+
+  // Horizontal positioning (for vertical bar charts)
+  const shouldFlipX = xWithMargin + tooltipWidth + tooltipOffset > width;
+  const targetX = shouldFlipX
     ? xWithMargin - tooltipOffset - tooltipWidth
     : xWithMargin + tooltipOffset;
 
+  // Vertical positioning (for horizontal bar charts)
+  // Position tooltip slightly above the center of the bar
+  const aboveCenterOffset = 20; // pixels above center
+  const tooltipCenterY = yWithMargin - tooltipHeight / 2 - aboveCenterOffset;
+  // Clamp to stay within bounds
+  const targetY = Math.max(
+    margin.top,
+    Math.min(tooltipCenterY, height - tooltipHeight - margin.bottom)
+  );
+
   // Track flip state for animation
-  const prevFlipRef = useRef(shouldFlip);
+  const prevFlipRef = useRef(shouldFlipX);
   const [flipKey, setFlipKey] = useState(0);
 
   useEffect(() => {
-    if (prevFlipRef.current !== shouldFlip) {
+    if (prevFlipRef.current !== shouldFlipX) {
       setFlipKey((k) => k + 1);
-      prevFlipRef.current = shouldFlip;
+      prevFlipRef.current = shouldFlipX;
     }
-  }, [shouldFlip]);
+  }, [shouldFlipX]);
 
   // Animated positions
   const animatedLeft = useSpring(targetX, springConfig);
+  const animatedTop = useSpring(targetY, springConfig);
   const animatedX = useSpring(xWithMargin, crosshairSpringConfig);
 
   useEffect(() => {
     animatedLeft.set(targetX);
   }, [targetX, animatedLeft]);
+
+  useEffect(() => {
+    animatedTop.set(targetY);
+  }, [targetY, animatedTop]);
 
   useEffect(() => {
     animatedX.set(xWithMargin);
@@ -125,16 +158,24 @@ export function ChartTooltip({
     }));
   }, [tooltipData, lines, rowsRenderer]);
 
-  // Title from date
-  const title = tooltipData
-    ? xAccessor(tooltipData.point).toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
+  // Title from date or category
+  const title = useMemo(() => {
+    if (!tooltipData) {
+      return undefined;
+    }
+    if (isHorizontal && barXAccessor) {
+      // For horizontal bar charts, use the category name
+      return barXAccessor(tooltipData.point);
+    }
+    // For vertical charts, use the date
+    return xAccessor(tooltipData.point).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }, [tooltipData, isHorizontal, barXAccessor, xAccessor]);
 
-  const transformOrigin = shouldFlip ? "right top" : "left top";
+  const transformOrigin = shouldFlipX ? "right top" : "left top";
 
   // Use portal to render into the chart container
   // Only render after mount on client side
@@ -167,19 +208,29 @@ export function ChartTooltip({
               width="line"
               x={x}
             />
+          </g>
+        </svg>
+      )}
 
-            {/* Dots on lines */}
-            {showDots &&
-              lines.map((line) => (
-                <TooltipDot
-                  color={line.stroke}
-                  key={line.dataKey}
-                  strokeColor={chartCssVars.background}
-                  visible={visible}
-                  x={x}
-                  y={tooltipData?.yPositions[line.dataKey] ?? 0}
-                />
-              ))}
+      {/* Dots on bars/lines - show for vertical charts only */}
+      {showDots && visible && !isHorizontal && (
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          height="100%"
+          width="100%"
+        >
+          <g transform={`translate(${margin.left},${margin.top})`}>
+            {lines.map((line) => (
+              <TooltipDot
+                color={line.stroke}
+                key={line.dataKey}
+                strokeColor={chartCssVars.background}
+                visible={visible}
+                x={tooltipData?.xPositions?.[line.dataKey] ?? x}
+                y={tooltipData?.yPositions[line.dataKey] ?? 0}
+              />
+            ))}
           </g>
         </svg>
       )}
@@ -188,17 +239,21 @@ export function ChartTooltip({
       {visible && (
         <motion.div
           animate={{ opacity: 1 }}
-          className={cn("pointer-events-none absolute top-10 z-50", className)}
+          className={cn("pointer-events-none absolute z-50", className)}
           exit={{ opacity: 0 }}
           initial={{ opacity: 0 }}
           ref={tooltipRef}
-          style={{ left: animatedLeft }}
+          style={
+            isHorizontal
+              ? { left: xWithMargin + tooltipOffset, top: animatedTop }
+              : { left: animatedLeft, top: margin.top }
+          }
           transition={{ duration: 0.1 }}
         >
           <motion.div
             animate={{ scale: 1, opacity: 1, x: 0 }}
             className="min-w-[140px] overflow-hidden rounded-lg bg-zinc-900/30 text-white shadow-lg backdrop-blur-md"
-            initial={{ scale: 0.85, opacity: 0, x: shouldFlip ? 20 : -20 }}
+            initial={{ scale: 0.85, opacity: 0, x: shouldFlipX ? 20 : -20 }}
             key={flipKey}
             style={{ transformOrigin }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -217,13 +272,13 @@ export function ChartTooltip({
         </motion.div>
       )}
 
-      {/* Date Ticker at bottom */}
-      {showDatePill && dateLabels.length > 0 && visible && (
+      {/* Date/Category Ticker - only show for vertical charts */}
+      {showDatePill && dateLabels.length > 0 && visible && !isHorizontal && (
         <motion.div
           className="pointer-events-none absolute z-50"
           style={{
             left: animatedX,
-            x: "-50%",
+            transform: "translateX(-50%)",
             bottom: 4,
           }}
         >

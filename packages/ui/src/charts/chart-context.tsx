@@ -1,12 +1,15 @@
 "use client";
 
-import type { scaleLinear, scaleTime } from "@visx/scale";
+import type { scaleBand, scaleLinear, scaleTime } from "@visx/scale";
 
 type ScaleLinear<Output, _Input = number> = ReturnType<
   typeof scaleLinear<Output>
 >;
 type ScaleTime<Output, _Input = Date | number> = ReturnType<
   typeof scaleTime<Output>
+>;
+type ScaleBand<Domain extends { toString(): string }> = ReturnType<
+  typeof scaleBand<Domain>
 >;
 
 import {
@@ -48,6 +51,8 @@ export interface TooltipData {
   x: number;
   /** Y positions for each line, keyed by dataKey */
   yPositions: Record<string, number>;
+  /** X positions for each series (for grouped bars), keyed by dataKey */
+  xPositions?: Record<string, number>;
 }
 
 export interface LineConfig {
@@ -93,6 +98,24 @@ export interface ChartContextValue {
 
   // Pre-computed date labels for ticker animation
   dateLabels: string[];
+
+  // Bar chart specific (optional - only present in BarChart)
+  /** Band scale for categorical x-axis (bar charts) */
+  barScale?: ScaleBand<string>;
+  /** Width of each bar band */
+  bandWidth?: number;
+  /** Index of currently hovered bar */
+  hoveredBarIndex?: number | null;
+  /** Setter for hovered bar index */
+  setHoveredBarIndex?: (index: number | null) => void;
+  /** X accessor for bar charts (returns string instead of Date) */
+  barXAccessor?: (d: Record<string, unknown>) => string;
+  /** Bar chart orientation */
+  orientation?: "vertical" | "horizontal";
+  /** Whether bars are stacked */
+  stacked?: boolean;
+  /** Stack offsets: Map of data index -> Map of dataKey -> cumulative offset */
+  stackOffsets?: Map<number, Map<string, number>>;
 }
 
 const ChartContext = createContext<ChartContextValue | null>(null);
@@ -114,7 +137,7 @@ export function useChart(): ChartContextValue {
   if (!context) {
     throw new Error(
       "useChart must be used within a ChartProvider. " +
-        "Make sure your component is wrapped in <LineChart>."
+        "Make sure your component is wrapped in <LineChart>, <AreaChart>, or <BarChart>."
     );
   }
   return context;

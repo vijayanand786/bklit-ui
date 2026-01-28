@@ -25,6 +25,7 @@ interface SiteHeaderProps {
 const components = [
   { text: "Line Chart", url: "/docs/components/line-chart" },
   { text: "Area Chart", url: "/docs/components/area-chart" },
+  { text: "Bar Chart", url: "/docs/components/bar-chart" },
   { text: "Ring Chart", url: "/docs/components/ring-chart" },
   { text: "Radar Chart", url: "/docs/components/radar-chart" },
   { text: "Legend", url: "/docs/components/legend" },

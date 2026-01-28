@@ -27,6 +27,21 @@
           }
         }
       }
+    },
+    {
+      // Chart components have inherent complexity due to handling multiple configurations
+      // (stacked/grouped, horizontal/vertical, multi-series, tooltips, animations)
+      "includes": [
+        "packages/ui/src/charts/bar-chart.tsx",
+        "packages/ui/src/charts/bar.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
+          }
+        }
+      }
     }
   ]
 }
