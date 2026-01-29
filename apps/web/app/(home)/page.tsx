@@ -15,6 +15,12 @@ const fadeInBlur = {
   animate: { opacity: 1, filter: "blur(0px)" },
 };
 
+// Separate variant for chart container - avoids filter property which breaks backdrop-filter
+const fadeInOnly = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+};
+
 export default function HomePage() {
   const [showContent, setShowContent] = useState(false);
 
@@ -73,7 +79,7 @@ export default function HomePage() {
             className="container mx-auto"
             initial="initial"
             transition={{ delay: staggerDelay * 2, duration: 0.6 }}
-            variants={fadeInBlur}
+            variants={fadeInOnly}
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-12">
               <HomeComponents />
